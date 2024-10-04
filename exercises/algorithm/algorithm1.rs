@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -31,11 +31,15 @@ struct LinkedList<T> {
 
 impl<T> Default for LinkedList<T> {
     fn default() -> Self {
-        Self::new()
+        Self {
+            length: 0,
+            start: None,
+            end: None,
+        }
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,15 +73,46 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+		let mut merged_list = LinkedList::new();
+
+        while list_a.length > 0 && list_b.length > 0 {
+            let val_a = list_a.get(0).unwrap();
+            let val_b = list_b.get(0).unwrap();
+
+            if val_a <= val_b {
+                merged_list.add(val_a.clone());
+                list_a.remove_first();
+            } else {
+                merged_list.add(val_b.clone());
+                list_b.remove_first();
+            }
         }
+
+        // Add remaining elements from list_a if any
+        while list_a.length > 0 {
+            let val_a = list_a.get(0).unwrap();
+            merged_list.add(val_a.clone());
+            list_a.remove_first();
+        }
+
+        // Add remaining elements from list_b if any
+        while list_b.length > 0 {
+            let val_b = list_b.get(0).unwrap();
+            merged_list.add(val_b.clone());
+            list_b.remove_first();
+        }
+
+        merged_list
 	}
+    fn remove_first(&mut self) {
+        if let Some(start_ptr) = self.start {
+            let next_ptr = unsafe { (*start_ptr.as_ptr()).next };
+            self.start = next_ptr;
+            self.length -= 1;
+        }
+    }
 }
 
 impl<T> Display for LinkedList<T>
